@@ -4,7 +4,7 @@ Hyper-V Cluster to Nutanix AHV migration tool is a single file powershell script
 You are using this script at your own risk. There are absolutelu no warranty or wathsoever. 
 
 # Why
-This tool was made because I need to migrate bunch of VM form Hyper-V cluster to Nutanix AHV and I could't find any suitable tool for this purpose which could automate whole process. 
+This tool was made because I need to migrate bunch of VMs form Hyper-V cluster to Nutanix AHV and I could't find any suitable tool for this purpose which could automate whole process. I know there is lot of things what sould be done differently, but it was made in hurry, and it was good enough to do it's job.
 
 # Pros
 - Source VM will be intact
