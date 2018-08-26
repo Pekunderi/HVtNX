@@ -63,7 +63,7 @@ This tool was made because I need to migrate bunch of VMs form Hyper-V cluster t
 ## Open-HVtNXConfigForm
 - Synopsis: 
   Graphical UI to prepare Hyper-V Cluster VMs to convert and import them to Nutanix AHV
-- Description: 
+- Description:  
   Graphical UI will help to prepare disk configuration before migrating them to Nutanix AHV. 
 - Settings
 	- Clone MAC: This setting will copy MAC address(es) from hyper-v virtual machine to Nutanix VM
