@@ -14,7 +14,7 @@ This tool was made because I need to migrate bunch of VMs form Hyper-V cluster t
 - Migration settings, and VM's to migrated can be planned in advance
 - Migration can be scheduled
 - Migration could be done same time from multiple hyper-v clusters
-- Source VM will be shutdown automatically, at the time when VM migration begins
+ - Source VM will be shutdown automatically, at the time when VM migration begins
 - GUI for make necessary configurations
 - Human readable settings in the Hyper-V VM:s Notes field
 
