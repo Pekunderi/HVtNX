@@ -15,7 +15,8 @@ This tool was made because I need to migrate bunch of VMs form Hyper-V cluster t
 - Migration can be scheduled
 - Migration could be done same time from multiple hyper-v clusters
 - Source VM will be shutdown automatically, at the time when VM migration begins
-- 
+- GUI for make necessary configurations
+- Human readable settings in the Hyper-V VM:s Notes field
 
 # Cons
 - VirtIO drivers need to be installed before migration
@@ -23,10 +24,8 @@ This tool was made because I need to migrate bunch of VMs form Hyper-V cluster t
 - Not suitable for VM's which have huge virtual disk(s), like over 500GB, it would take long time to migrate
 - There is bugs in the code. This script was done because I just need a tool, not a bug free program which will do everything
 - Gen2 VM's, might be using UEFI boot
- - Windows machines might work, but UEFI boot mode must be set using acli
- - Linux machines are difficult to get working
-- GUI for make necessary configurations
-- Human readable settings in the Hyper-V VM:s Notes field
+ - Windows machines with UEFI boot might work, but UEFI boot mode must be set using acli
+ - Linux machines with UEFI boot are difficult to get working
 
 # Requirements
 - Hyper-V clusters: Windows Server 2012 and Windows Server 2012 R2
