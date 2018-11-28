@@ -15,8 +15,8 @@
 ##################################################################################
 
 
-$Scriptversion = "0.0.10"
-$ScriptVersionDate = "25.07.2018"
+$Scriptversion = "0.0.11 @ Nextconf"
+$ScriptVersionDate = "28.11.2018"
 
 
 Write-Host "######################################################################################" 
@@ -102,7 +102,7 @@ Param(
         Write-Host "Could not read VM information from Nutanix, it should already be there. WM name is: "$VM.VMName
         Write-Host "Script will now exit!!!"
 
-        exit
+       # exit
     
     }
     
@@ -295,14 +295,16 @@ Function script:Show-HVtNXMoveStatus {
             $VMinfo = New-Object System.Object
 
                 $vminfo | Add-Member -type NoteProperty -name Name -Value $jobsparams.Vmname
+                $vminfo | Add-Member -type NoteProperty -name Percent -Value $result.Trim()
                 $vminfo | Add-Member -type NoteProperty -name Diskpath -Value $jobsparams.DiskPath
                 $vminfo | Add-Member -type NoteProperty -name Host -Value $job.location
-                $vminfo | Add-Member -type NoteProperty -name Percent -Value $result.Trim()
+                
         
             $VMSpecs += $VMinfo
-        
+            
         }
         $VMSpecs |Format-Table -AutoSize -Wrap
+        #write-host ($job | Receive-Job -Keep)
     }
     Else {
         Write-host "Waiting jobs to be created"
@@ -328,8 +330,8 @@ Param(
      $Diskparams| Add-Member -type NoteProperty -name VHDType -Value  $VHDType # Qemu-img type of the vhd vhx or vpc
      $Diskparams| Add-Member -type NoteProperty -name Container -Value ($RawDArray[3]) # Container name
      $Diskparams| Add-Member -type NoteProperty -name BusID -Value ($RawDArray[2]) # Bus id like: scsi.0
-     $Diskparams| Add-Member -type NoteProperty -name ADSFPath -Value ($RawDArray[1].replace(":","").replace(($RawDArray[1].Split(".")|Select-Object -Last 1),"raw").Replace("\","/")).ToLower() # Full ADSF pat with filename and extension
-     $Diskparams| Add-Member -type NoteProperty -name HVFilePath -Value $RawDArray[1].ToLower()
+     $Diskparams| Add-Member -type NoteProperty -name ADSFPath -Value ($RawDArray[1].replace(":","").replace(($RawDArray[1].Split(".")|Select-Object -Last 1),"raw").Replace("\","/"))#.ToLower() # Full ADSF pat with filename and extension
+     $Diskparams| Add-Member -type NoteProperty -name HVFilePath -Value $RawDArray[1]#.ToLower()
 
      Return $Diskparams
 
@@ -391,7 +393,7 @@ Param(
     If ($Confirmation.ToLower() -ne "yes"){
         Write-Host "No confirmation, so script will exit. Press CTRL + c if you don't want to close powerShell console"
         pause
-        Exit
+      #  Exit
 
     }
 
@@ -411,7 +413,7 @@ Param(
                 Write-host "Press CTRL + c if you don't want to close powerShell console"
                 Pause
 
-                Exit
+              #  Exit
         
             }
     
@@ -428,7 +430,7 @@ Param(
     If ($Confirmation.ToLower() -ne "yes"){
         Write-Host "No confirmation, so script will exit, press CTRL + c if you don't want to close powerShell console"
 
-        Exit
+#        Exit
 
     }
 
@@ -474,8 +476,8 @@ Param(
             $DiskProperties = Get-HVtNXDiskNameParser -String $DiskToMove
             
             # Windows UNC path, where RAW disk image will be stored
-            $WinRAWFilePath = "\\" + $NTNXServer + "\" + $DiskProperties.Container + "\" + $HyperVCluster.ToLower() +"\" + $DiskProperties.ADSFPath.Replace("/","\") # Full raw file path to qemu destination 
-                
+            $WinRAWFilePath = "\\" + $NTNXServer + "\" + $DiskProperties.Container + "\" + $HyperVCluster +"\" + $DiskProperties.ADSFPath.Replace("/","\").Replace("\\","") # Full raw file path to qemu destination 
+            
             # Explanation of command
             # First we need to map drive where qemu is. In this case it's ADSF path. This is done because windows version of qemu needs at least as much storage space in current drive as vhd size is.
             # Qemudrive is just drive letter for qemu, you can choose any available drive.
@@ -486,13 +488,14 @@ Param(
             Try {
                 # Generating command(s), split by ";". First it will map drive and after that it will run qemu-img, with necessary parameters
                 $CMDString =  'net use '+$QemuDrive+' "'+ $UncPathToQemuShare +'";'+$QemuDrive  +';& "'+$QemuDrive+'\qemu-img\qemu-img.exe" convert -m '+ $Streams + ' -p -f ' + $DiskProperties.VHDType  + ' -O raw "' + $DiskProperties.HVFilePath + '" "' + $WinRAWFilePath + '"'
-           
+                write-host $CMDString
+                pause
                 $scriptBlock = [Scriptblock]::Create($CMDString)
                 
                 "Job Command# $CMDString" | Out-File -Append -FilePath $VMDiskLog
                
                 # Script will run command remotely on that host which own Hyper-V virtual machine
-                $JobNameString = "NuTa;" + $BatchName + ";" + $vm.VMName + ";/" + $DiskProperties.Container  + "/" + $HyperVCluster.ToLower() + "/"+ $DiskProperties.ADSFPath.ToLower() + ";" + $DiskProperties.BusID + ";" + $DiskProperties.Container
+                $JobNameString = "NuTa;" + $BatchName + ";" + $vm.VMName + ";/" + $DiskProperties.Container  + "/" + $HyperVCluster + "/"+ $DiskProperties.ADSFPath.Replace("//","") + ";" + $DiskProperties.BusID + ";" + $DiskProperties.Container
                 "Job String# $JobNameString" | Out-File -Append -FilePath $VMDiskLog
                 
                 Invoke-Command -ComputerName $vm.ComputerName -Command  $scriptBlock -AsJob -JobName $JobNameString
@@ -1147,19 +1150,18 @@ Param(
  [Parameter(Mandatory=$True,Position=2)] [securestring]$NXPassword,
  [Parameter(Mandatory=$True,Position=3)] [DateTime]$StartTime,
  [Parameter(Mandatory=$True,Position=4)] [int]$SimultaneusCount,
- [Parameter(Mandatory=$True,Position=5)] [int]$Streams,
+ [Parameter(Mandatory=$True,Position=5)] [int]$Streams
  [Parameter(Mandatory=$True,Position=6)] [string]$LogPath
  
 
  )
-   $Cluster = "Your HyperV clustername"
-   $Server = "YOUR Nutanix IP or NAME"
-   $User = "USERNAME"
-   $Unc = "\\nutanixip\adsf"     # Last part is case sensitive, don't ask me why....
+   $Cluster = "HyperV Cluster ip or name"
+   $Server = "Nutanixcluster ip or name"
+   $User = "username"
+   $Unc = "\\unc_path_to_qemu-img\folder"     # Last part is case sensitive, don't ask me why....
    $drive = "z:"
-
-   
-
+   $LogPath = "c:\log"
+  
    # SimultaneusCount, How many concurrent vhd(x) moves
    # Streams, check qemu-img parameter "-m" min 1, max 16
 
